@@ -1,5 +1,8 @@
-screengrab  : https://github.com/Agilitas/screengrab
+ScreenGrab 
 ==========
+
+Fork of https://github.com/Agilitas/screengrab
+Modifications: .net451 frameworks, saving to .PNG images files.
 
 Windows screen capture program written in C# with a WPF front end.
 
@@ -13,9 +16,12 @@ Features:
 * Copy to clipboard
 * Save to disk
 
+![Screen shot:](ScreenGrapApp.png)
+
 Wishlist
 --------
 
+* Save as file name in toolbar, no file dialog
 * Add more annotation tools:
 * Pen
 * Unfilled highlight
