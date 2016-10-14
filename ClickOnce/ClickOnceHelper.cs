@@ -6,17 +6,20 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace ScreenGrab.ClickOnce {
+namespace ScreenGrab.ClickOnce
+{
     /*
      * Click once is not enabled. Need to set the publish properties and re-enable the check for updates menu option
      * */
-    public class ClickOnceHelper {
+    public class ClickOnceHelper
+    {
 
         public static event UpdateCompleteEventHandler Finished;
 
         private static Dispatcher dispatcher = null;
 
-        public static void CheckForUpdates() {
+        public static void CheckForUpdates()
+        {
             _logMessages = new List<string>();
             _logMessages.Add("CheckForUpdates");
             dispatcher = Dispatcher.CurrentDispatcher;
@@ -26,17 +29,21 @@ namespace ScreenGrab.ClickOnce {
             t.Start();
         }
 
-        public static bool CanCheckForUpdates() {
+        public static bool CanCheckForUpdates()
+        {
             return ApplicationDeployment.IsNetworkDeployed;
         }
 
-        static void RaiseFinishedTask(bool restart) {
+        static void RaiseFinishedTask(bool restart)
+        {
             var action = new Action<object, UpdateCompleteEventArgs>(Finished);
             dispatcher.Invoke(DispatcherPriority.Normal, action, null, new UpdateCompleteEventArgs(restart));
         }
 
-        public static string CurrentVersion {
-            get {
+        public static string CurrentVersion
+        {
+            get
+            {
                 if (ApplicationDeployment.IsNetworkDeployed) {
                     var v = ApplicationDeployment.CurrentDeployment.CurrentVersion;
                     return string.Format("v{0}.{1}.{2}", v.Major, v.Minor, v.Revision);
@@ -47,7 +54,8 @@ namespace ScreenGrab.ClickOnce {
             }
         }
 
-        static void DoTask() {
+        static void DoTask()
+        {
 
             bool restart = false;
             _logMessages.Add("DoTask_Start");
@@ -56,16 +64,19 @@ namespace ScreenGrab.ClickOnce {
             try {
                 if (ApplicationDeployment.IsNetworkDeployed) {
                     ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
-                    
+
                     try {
                         info = ad.CheckForDetailedUpdate();
-                    } catch (DeploymentDownloadException dde) {
+                    }
+                    catch (DeploymentDownloadException dde) {
                         _logMessages.Add("DeploymentDownloadException " + dde.Message);
                         MessageBox.Show("The new version of the application cannot be downloaded at this time. \n\nPlease check your network connection, or try again later. Error: " + dde.Message);
-                    } catch (InvalidDeploymentException ide) {
+                    }
+                    catch (InvalidDeploymentException ide) {
                         _logMessages.Add("InvalidDeploymentException " + ide.Message);
                         MessageBox.Show("Cannot check for a new version of the application. The ClickOnce deployment is corrupt. Please redeploy the application and try again. Error: " + ide.Message);
-                    } catch (InvalidOperationException ioe) {
+                    }
+                    catch (InvalidOperationException ioe) {
                         _logMessages.Add("InvalidOperationException " + ioe.Message);
                         MessageBox.Show("This application cannot be updated. It is likely not a ClickOnce application. Error: " + ioe.Message);
                     }
@@ -75,7 +86,8 @@ namespace ScreenGrab.ClickOnce {
                         if (!info.IsUpdateRequired) {
                             var dr = ShowYesNoMessage("An update is available. Would you like to update the application now? You will be prompted to restart the application once it is updated");
                             doUpdate = (dr == MessageBoxResult.Yes);
-                        } else {
+                        }
+                        else {
                             _logMessages.Add("Mandatory update available");
                             // Display a message that the app MUST reboot. Display the minimum required version.
                             MessageBox.Show("This application has detected a mandatory update from your current " +
@@ -92,26 +104,31 @@ namespace ScreenGrab.ClickOnce {
                                 _logMessages.Add("Updating....");
                                 ad.Update();
                                 restart = true;
+
                                 //var dr = ShowYesNoMessage("The application has been upgraded. You need to restart to use the updated version. Restart now?");
                                 //if (dr == MessageBoxResult.Yes) {
-                                    
+
                                 //System.Windows.Forms.Application.Restart();
                                 //Application.Current.Shutdown();
                                 //}
-                            } catch (DeploymentDownloadException dde) {
+                            }
+                            catch (DeploymentDownloadException dde) {
                                 _logMessages.Add("DeploymentDownloadException " + dde.Message);
                                 MessageBox.Show("Cannot install the latest version of the application. \n\nPlease check your network connection, or try again later. Error: " + dde);
                             }
                         }
 
-                    } else {
+                    }
+                    else {
                         _logMessages.Add("No updates...");
                         MessageBox.Show("No updates available at this time", "Update", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 _logMessages.Add("EXCEPTION: " + ex.Message);
-            } finally {
+            }
+            finally {
                 _logMessages.Add(" ***** DONE *****");
                 File.WriteAllLines(LogFile, _logMessages);
                 RaiseFinishedTask(restart);
@@ -120,8 +137,10 @@ namespace ScreenGrab.ClickOnce {
         }
 
         private static string _logFile;
-        static string LogFile {
-            get {
+        static string LogFile
+        {
+            get
+            {
                 if (string.IsNullOrWhiteSpace(_logFile)) {
                     _logFile = Path.GetTempFileName();
                 }
@@ -129,7 +148,8 @@ namespace ScreenGrab.ClickOnce {
             }
         }
 
-        static MessageBoxResult ShowYesNoMessage(string msg) {
+        static MessageBoxResult ShowYesNoMessage(string msg)
+        {
             _logMessages.Add(msg);
             var res = MessageBox.Show(msg, "Updater", MessageBoxButton.YesNo, MessageBoxImage.Question);
             _logMessages.Add("User Clicked: " + res);
@@ -138,8 +158,47 @@ namespace ScreenGrab.ClickOnce {
 
         private static List<string> _logMessages;//= new List<string>();
 
-        static void Log(string msg) {
+        static void Log(string msg)
+        {
             //File.WriteAllText();
         }
+
+        /*
+                     private void CheckForUpdatesCanExecute(object sender, CanExecuteRoutedEventArgs e) {
+                         e.CanExecute = ClickOnceHelper.CanCheckForUpdates();
+                     }
+
+                     private void CheckForUpdatesExecuted(object sender, ExecutedRoutedEventArgs e) {
+
+                         DoubleAnimation da = new DoubleAnimation {
+                             From = 0,
+                             To = 360,
+                             Duration = new Duration(TimeSpan.FromSeconds(2)),
+                             RepeatBehavior = RepeatBehavior.Forever
+                         };
+                         RotateTransform rt = new RotateTransform();
+                         CheckForUpdatesButton.RenderTransformOrigin = new Point(0.5, 0.5);
+                         CheckForUpdatesButton.RenderTransform = rt;
+                         rt.BeginAnimation(RotateTransform.AngleProperty, da);
+
+                         ClickOnceHelper.Finished += ClickOnceHelperFinished;
+                         ClickOnceHelper.CheckForUpdates();
+                     }
+
+                     void ClickOnceHelperFinished(object sender, UpdateCompleteEventArgs args) {
+                         CheckForUpdatesButton.RenderTransform = null;
+                         if (!args.NeedsRestart) {
+                             return;
+                         }
+                         var dr = MessageBox.Show("The application has been upgraded. You need to restart to use the updated version. Restart now?", "Update complete", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                         if (dr == MessageBoxResult.Yes) {
+                             //restart = true;
+                             System.Windows.Forms.Application.Restart();
+                             Application.Current.Shutdown();
+                         }
+
+                     }
+             */
+
     }
 }

@@ -8,8 +8,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace ScreenGrab.Controls {
-    class CanvasWithOverlay : Canvas {
+namespace ScreenGrab.Controls
+{
+    public class CanvasWithOverlay : Canvas
+    {
 
         public event AddHighlightEventHandler HighlightAdded = delegate { };
 
@@ -19,7 +21,8 @@ namespace ScreenGrab.Controls {
         public static readonly DependencyProperty HighlightColorProperty;
         public static readonly DependencyProperty HighlightsProperty;
 
-        static CanvasWithOverlay() {
+        static CanvasWithOverlay()
+        {
             ImageProperty = DependencyProperty.Register("Image",
                                                         typeof(ImageSource),
                                                         typeof(CanvasWithOverlay),
@@ -34,11 +37,13 @@ namespace ScreenGrab.Controls {
                                                              typeof(CanvasWithOverlay));
         }
 
-        public CanvasWithOverlay() {
+        public CanvasWithOverlay()
+        {
             Highlights = new ObservableCollection<AnnotationHighlight>();
         }
 
-        private static void ImagePropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e) {
+        private static void ImagePropertyChangedCallback(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
             //((IllustrationClients)d)._headerText.Text = e.NewValue.ToString();
             CanvasWithOverlay obj = (CanvasWithOverlay)d;
             //obj.RemoveAllHighlights();
@@ -53,23 +58,27 @@ namespace ScreenGrab.Controls {
             obj.RedrawHighlights();
         }
 
-        public ImageSource Image {
+        public ImageSource Image
+        {
             get { return (ImageSource)GetValue(ImageProperty); }
             set { SetValue(ImageProperty, value); }
         }
 
-        public string HighlightColor {
+        public string HighlightColor
+        {
             get { return (string)GetValue(HighlightColorProperty); }
             set { SetValue(HighlightColorProperty, value); }
         }
 
-        public ObservableCollection<AnnotationHighlight> Highlights {
+        public ObservableCollection<AnnotationHighlight> Highlights
+        {
             get { return (ObservableCollection<AnnotationHighlight>)GetValue(HighlightsProperty); }
             set { SetValue(HighlightsProperty, value); }
         }
 
 
-        Brush HighlightColorBrush {
+        Brush HighlightColorBrush
+        {
             get { return (SolidColorBrush)new BrushConverter().ConvertFromString(HighlightColor); }
         }
 
@@ -84,7 +93,8 @@ namespace ScreenGrab.Controls {
 
         private AnnotationHighlight _highlightBeingAdded;
 
-        void RedrawHighlights() {
+        void RedrawHighlights()
+        {
             RemoveAllHighlights();
             if (Highlights == null) {
                 return;
@@ -94,18 +104,21 @@ namespace ScreenGrab.Controls {
             }
         }
 
-        public void RemoveAllHighlights() {
-            if (Highlights == null) {return;}
+        public void RemoveAllHighlights()
+        {
+            if (Highlights == null) { return; }
             Children.RemoveRange(0, Children.Count);
         }
 
-        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) {
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
             base.OnMouseLeftButtonDown(e);
             _startPoint = e.GetPosition(this);
 
-            _currentRectangle =  AddNewRectangle(HighlightColorBrush, _startPoint.X, _startPoint.Y);
+            _currentRectangle = AddNewRectangle(HighlightColorBrush, _startPoint.X, _startPoint.Y);
 
-            _highlightBeingAdded = new AnnotationHighlight {
+            _highlightBeingAdded = new AnnotationHighlight
+            {
                 Rectangle = _currentRectangle,
                 TopLeft = _startPoint,
                 Color = HighlightColorBrush
@@ -113,8 +126,10 @@ namespace ScreenGrab.Controls {
 
         }
 
-        private Rectangle AddNewRectangle(Brush color, double x, double y, double w = 0, double h = 0) {
-            var r = new Rectangle {
+        private Rectangle AddNewRectangle(Brush color, double x, double y, double w = 0, double h = 0)
+        {
+            var r = new Rectangle
+            {
                 Stroke = Brushes.LightBlue,
                 StrokeThickness = 1,
                 Fill = color,
@@ -138,7 +153,8 @@ namespace ScreenGrab.Controls {
         //    //rect.Opacity -= 0.1;
         //}
 
-        protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e) {
+        protected override void OnMouseLeftButtonUp(MouseButtonEventArgs e)
+        {
             base.OnMouseUp(e);
             HighlightAdded(this, new AddHighlightEventArgs(_highlightBeingAdded));
             _highlightBeingAdded = null;
@@ -146,7 +162,8 @@ namespace ScreenGrab.Controls {
             //_currentRectangle.MouseLeave += _currentRectangle_MouseLeave;
         }
 
-        protected override void OnMouseMove(MouseEventArgs e) {
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
             base.OnMouseMove(e);
             if (e.LeftButton == MouseButtonState.Released || _currentRectangle == null)
                 return;
@@ -204,9 +221,11 @@ namespace ScreenGrab.Controls {
 
     public delegate void AddHighlightEventHandler(object sender, AddHighlightEventArgs args);
 
-    public class AddHighlightEventArgs : EventArgs {
+    public class AddHighlightEventArgs : EventArgs
+    {
         public AnnotationHighlight TheHighlight { get; private set; }
-        public AddHighlightEventArgs(AnnotationHighlight theHighlight) {
+        public AddHighlightEventArgs(AnnotationHighlight theHighlight)
+        {
             TheHighlight = theHighlight;
         }
     }

@@ -5,12 +5,15 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Windows;
-using System.Windows.Forms;
+//using System.Windows.Forms;
+using Screen = System.Windows.Forms.Screen;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace ScreenGrab {
-    public class ScreenCapture {
+namespace ScreenGrab
+{
+    public class ScreenCapture
+    {
 
         public ImageSource Source { get; private set; }
         public string DateCaptured { get; private set; }
@@ -19,8 +22,10 @@ namespace ScreenGrab {
         public Int32Rect SourcePosition { get; set; }
 
         private ObservableCollection<AnnotationHighlight> _highlights;
-        public ObservableCollection<AnnotationHighlight> Highlights {
-            get {
+        public ObservableCollection<AnnotationHighlight> Highlights
+        {
+            get
+            {
                 if (_highlights == null) {
                     _highlights = new ObservableCollection<AnnotationHighlight>();
                 }
@@ -29,13 +34,15 @@ namespace ScreenGrab {
             set { _highlights = value; }
         }
 
-        public ScreenCapture(ImageSource source) {
+        public ScreenCapture(ImageSource source)
+        {
             Source = source;
             DateCaptured = DateTime.Now.ToString(CultureInfo.InvariantCulture);
             Highlights = new ObservableCollection<AnnotationHighlight>();
         }
 
-        public Stream ImageAsPng() {
+        public Stream ImageAsPng()
+        {
 
             PngBitmapEncoder encoder = new PngBitmapEncoder();
             MemoryStream stream = new MemoryStream();
@@ -53,7 +60,8 @@ namespace ScreenGrab {
         //    return stream;
         //}
 
-        public Stream ImageAsJpg() {
+        public Stream ImageAsJpg()
+        {
             DrawingVisual drawingVisual = new DrawingVisual();
             DrawingContext drawingContext = drawingVisual.RenderOpen();
             drawingContext.DrawImage(Source, new Rect(0, 0, Source.Width, Source.Height));
@@ -70,9 +78,10 @@ namespace ScreenGrab {
             RenderTargetBitmap rtb = new RenderTargetBitmap((int)Source.Width, (int)Source.Height, 96, 96, PixelFormats.Pbgra32);
             rtb.Render(drawingVisual);
 
-            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            encoder.QualityLevel = 75;
-            //PngBitmapEncoder encoder = new PngBitmapEncoder();
+            //JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            //encoder.QualityLevel = 75;
+            PngBitmapEncoder encoder = new PngBitmapEncoder();
+
             MemoryStream stream = new MemoryStream();
             encoder.Frames.Add(BitmapFrame.Create(rtb));
             encoder.Save(stream);
@@ -83,11 +92,13 @@ namespace ScreenGrab {
 
         private const double ThMax = 110;
 
-        Rect ImageDimensions() {
+        Rect ImageDimensions()
+        {
             return new Rect(0, 0, Source.Width, Source.Height);
         }
 
-        BitmapImage GetThumbnail() {
+        BitmapImage GetThumbnail()
+        {
 
             var d = ImageDimensions();
 
@@ -98,7 +109,8 @@ namespace ScreenGrab {
                 //landscape
                 tw = ThMax;
                 th = ThMax / ratio;
-            } else {
+            }
+            else {
                 //portrait
                 th = ThMax;
                 tw = ThMax * ratio;
@@ -120,7 +132,8 @@ namespace ScreenGrab {
         }
 
         private BitmapImage _thumbnail;
-        public BitmapImage Thumbnail {
+        public BitmapImage Thumbnail
+        {
             get { return _thumbnail ?? (_thumbnail = GetThumbnail()); }
         }
 
