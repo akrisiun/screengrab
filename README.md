@@ -1,10 +1,13 @@
-ScreenGrab 
-==========
+### ScreenGrab 
+Windows screen capture program written in C# with a WPF front end.
 
 Fork of https://github.com/Agilitas/screengrab
-Modifications: .net451 frameworks, saving to .PNG images files.
 
-Windows screen capture program written in C# with a WPF front end.
+Modifications: 
+ .net451 framework,  
+ saving to .PNG images files.  
+
+
 
 Features:
 ---------
