@@ -9,8 +9,7 @@ Modifications:
 
 
 
-Features:
----------
+#### Features:
 
 * Multi monitor support
 * Multiple captures
@@ -21,8 +20,7 @@ Features:
 
 ![Screen shot:](ScreenGrapApp.png)
 
-Wishlist
---------
+#### Wishlist
 
 * Save as file name in toolbar, no file dialog
 * Add more annotation tools:
