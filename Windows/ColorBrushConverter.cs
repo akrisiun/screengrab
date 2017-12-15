@@ -6,7 +6,12 @@ namespace ScreenGrab.Windows {
     [ValueConversion(typeof(string), typeof(SolidColorBrush))]
     public class ColorBrushConverter : IValueConverter {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+
+            if (value == null)
+                return new SolidColorBrush(Color.FromRgb(255, 255, 255));
+
             return new BrushConverter().ConvertFromString(value.ToString());
+
             //string color = value.ToString();
             //Color c = Color.FromName(color);
 
