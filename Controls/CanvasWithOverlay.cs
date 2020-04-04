@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -100,7 +99,8 @@ namespace ScreenGrab.Controls
                 return;
             }
             foreach (var hl in Highlights) {
-                AddNewRectangle(hl.Color, hl.TopLeft.X, hl.TopLeft.Y, hl.Rectangle.Width, hl.Rectangle.Height);
+                if (hl != null)
+                    AddNewRectangle(hl.Color, hl.TopLeft.X, hl.TopLeft.Y, hl.Rectangle.Width, hl.Rectangle.Height);
             }
         }
 

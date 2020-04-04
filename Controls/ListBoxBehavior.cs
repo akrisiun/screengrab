@@ -48,11 +48,15 @@ namespace ScreenGrab.Controls {
         }
 
         static void ListBox_Loaded(object sender, RoutedEventArgs e) {
-            var listBox = (ListBox)sender;
-            var incc = listBox.Items as INotifyCollectionChanged;
-            if (incc == null) return;
-            listBox.Loaded -= ListBox_Loaded;
-            Associations[listBox] = new Capture(listBox);
+            try
+            {
+                var listBox = (ListBox)sender;
+                var incc = listBox.Items as INotifyCollectionChanged;
+                if (incc == null) return;
+                listBox.Loaded -= ListBox_Loaded;
+                Associations[listBox] = new Capture(listBox);
+            }
+            catch (Exception) { }
         }
 
         class Capture : IDisposable {

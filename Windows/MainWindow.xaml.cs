@@ -68,6 +68,8 @@ namespace ScreenGrab.Windows
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Save, SaveSelectedGrab));
             CommandBindings.Add(new CommandBinding(ApplicationCommands.Copy, CopySelectedGrab));
 
+            CommandBindings.Add(new CommandBinding(ApplicationCommands.Open, OpenImage));
+
             //RoutedUICommand hl = new RoutedUICommand("Highlight", "HighlightCommand", typeof(MainWindow));
             CommandBindings.Add(new CommandBinding(ScreenGrabCommands.HighlightActivateCommand, HighlightToggle));
             CommandBindings.Add(new CommandBinding(ScreenGrabCommands.UserPreferences, UserPreferencesExecuted));
@@ -103,11 +105,13 @@ namespace ScreenGrab.Windows
         {
             //throw new NotImplementedException();
             ScreenCapture sel = _images.SelectedItem as ScreenCapture;
-            if (sel == null) {
+            if (sel == null)
+            {
                 return;
             }
 
-            if ((Keyboard.Modifiers & ModifierKeys.Alt) == 0) {
+            if ((Keyboard.Modifiers & ModifierKeys.Alt) == 0)
+            {
                 Visibility = Visibility.Hidden;
             }
 
@@ -129,6 +133,7 @@ namespace ScreenGrab.Windows
             Int32Rect r = new Int32Rect(x, y, imageToClone.SourcePosition.Width, imageToClone.SourcePosition.Height);
             CroppedBitmap crop = new CroppedBitmap(grabbedImage.Source as BitmapSource, r);
             var img = new ScreenCapture(crop) { SourcePosition = imageToClone.SourcePosition, SourceScreen = imageToClone.SourceScreen };
+
             Images.Add(img);
             Visibility = Visibility.Visible;
         }
@@ -163,27 +168,35 @@ namespace ScreenGrab.Windows
 
             Rectangle bounds = new Rectangle();
 
-            if (KeyboardHelper.IsModifierKeyDown) {
-                if (KeyboardHelper.IsCtrlDown) {
+            if (KeyboardHelper.IsModifierKeyDown)
+            {
+                if (KeyboardHelper.IsCtrlDown)
+                {
                     bounds = task.SelectedScreen.Bounds;
                 }
-                else if (KeyboardHelper.IsShiftDown) {
+                else if (KeyboardHelper.IsShiftDown)
+                {
                     bounds = Screen.FromHandle(new WindowInteropHelper(this).Handle).Bounds;
                 }
-                else if (KeyboardHelper.IsAltDown) {
+                else if (KeyboardHelper.IsAltDown)
+                {
                     //primary
                     bounds = Screen.PrimaryScreen.Bounds;
                 }
 
             }
-            if (bounds.IsEmpty) {
-                if (Settings.Default.ShowGrabOnCapturedScreen) {
+            if (bounds.IsEmpty)
+            {
+                if (Settings.Default.ShowGrabOnCapturedScreen)
+                {
                     bounds = task.SelectedScreen.Bounds;
                 }
-                else if (Settings.Default.ShowGrabOnActiveScreen) {
+                else if (Settings.Default.ShowGrabOnActiveScreen)
+                {
                     bounds = Screen.FromHandle(new WindowInteropHelper(this).Handle).Bounds;
                 }
-                else {
+                else
+                {
                     //primary
                     bounds = Screen.PrimaryScreen.Bounds;
                 }
@@ -196,7 +209,8 @@ namespace ScreenGrab.Windows
 
             win.ShowDialog();
 
-            if (win.ReturnedImage != null) {
+            if (win.ReturnedImage != null)
+            {
                 var gi = new ScreenCapture(win.ReturnedImage)
                 {
                     SourcePosition = win.ReturnedImageSource,
@@ -232,13 +246,15 @@ namespace ScreenGrab.Windows
             };
 
             diag.ShowDialog();
-            if (String.IsNullOrEmpty(diag.FileName)) {
+            if (String.IsNullOrEmpty(diag.FileName))
+            {
                 return;
             }
 
             var imgdata = SelectedCapture.ImageAsPng(); // .ImageAsJpg();
 
-            using (Stream file = File.OpenWrite(diag.FileName)) {
+            using (Stream file = File.OpenWrite(diag.FileName))
+            {
                 imgdata.Position = 0;
                 CopyStream(imgdata, file);
                 file.Close();
@@ -246,8 +262,7 @@ namespace ScreenGrab.Windows
 
         }
 
-        ScreenCapture SelectedCapture
-        {
+        ScreenCapture SelectedCapture {
             get { return _images.SelectedItem as ScreenCapture; }
         }
 
@@ -255,7 +270,8 @@ namespace ScreenGrab.Windows
         {
             byte[] buffer = new byte[8 * 1024];
             int len;
-            while ((len = input.Read(buffer, 0, buffer.Length)) > 0) {
+            while ((len = input.Read(buffer, 0, buffer.Length)) > 0)
+            {
                 output.Write(buffer, 0, len);
             }
         }
@@ -263,28 +279,63 @@ namespace ScreenGrab.Windows
         private void DeleteSelectedGrab(object sender, ExecutedRoutedEventArgs e)
         {
             var item = SelectedCapture;
-            if (item != null) {
+            if (item != null)
+            {
                 Images.Remove(item);
             }
+        }
+
+        private void OpenImage(object sender, ExecutedRoutedEventArgs e)
+        {
+            var diag = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = @"PNG Image (*.png)|*.png|" +
+                         @"JPG Image (*.jpg)|*.jpg"
+            };
+            if (!diag.ShowDialog() ?? false)
+                return;
+
+            var file = diag.FileName;
+            var ext = Path.GetExtension(file);
+            ImageSource source = null;
+            try
+            {
+                Stream iconStream = File.OpenRead(file);
+                if (ext == ".png")
+                {
+                    PngBitmapDecoder iconDecoder = new PngBitmapDecoder(iconStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+                    source = iconDecoder.Frames[0];
+                }
+                else if (ext.StartsWith(".jp"))
+                {
+                    var iconDecoder = new JpegBitmapDecoder(iconStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+                    source = iconDecoder.Frames[0];
+                }
+            }
+            catch (Exception ex) { MessageBox.Show(ex.Message); }
+            if (source == null)
+                return;
+
+            ScreenCapture item = new ScreenCapture(source, file);
+            Images.Add(item);
         }
 
         #region bindings
 
         private ObservableCollection<ScreenCapture> _images1;
-        public ObservableCollection<ScreenCapture> Images
-        {
+        public ObservableCollection<ScreenCapture> Images {
             get { return _images1 ?? (_images1 = new ObservableCollection<ScreenCapture>()); }
             set { _images1 = value; }
         }
 
         private ObservableCollection<Screen> _monitors;
-        public ObservableCollection<Screen> Monitors
-        {
-            get
-            {
-                if (_monitors == null) {
+        public ObservableCollection<Screen> Monitors {
+            get {
+                if (_monitors == null)
+                {
                     _monitors = new ObservableCollection<Screen>();
-                    foreach (Screen screen in Screen.AllScreens) {
+                    foreach (Screen screen in Screen.AllScreens)
+                    {
                         _monitors.Add(screen);
                     }
                 }
@@ -294,11 +345,10 @@ namespace ScreenGrab.Windows
         }
 
         private ObservableCollection<string> _availableHighlights;
-        public ObservableCollection<string> AvailableHighlights
-        {
-            get
-            {
-                if (_availableHighlights == null) {
+        public ObservableCollection<string> AvailableHighlights {
+            get {
+                if (_availableHighlights == null)
+                {
                     _availableHighlights = new ObservableCollection<string> { "Yellow", "Aqua", "Firebrick", "DarkSlateBlue", "DarkMagenta" };
                 }
                 return _availableHighlights;
@@ -306,23 +356,20 @@ namespace ScreenGrab.Windows
             set { _availableHighlights = value; }
         }
 
-        public object AppSettings
-        {
+        public object AppSettings {
             get { return Settings.Default; }
         }
 
         private string _selectedHighlight;
-        public string SelectedHighlight
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(_selectedHighlight)) {
+        public string SelectedHighlight {
+            get {
+                if (string.IsNullOrWhiteSpace(_selectedHighlight))
+                {
                     _selectedHighlight = Settings.Default.LastSelectedHighlight;
                 }
                 return _selectedHighlight;
             }
-            set
-            {
+            set {
                 _canvasWithOverlay.HighlightColor = value;
                 _selectedHighlight = value;
                 Settings.Default.LastSelectedHighlight = _selectedHighlight;
@@ -335,28 +382,27 @@ namespace ScreenGrab.Windows
 
         private void ImagesPreviewKeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Delete) {
+            if (e.Key == Key.Delete)
+            {
                 var item = ((ListBox)sender).SelectedItem as ScreenCapture;
-                if (item != null) {
+                if (item != null)
+                {
                     Images.Remove(item);
                 }
             }
         }
 
         private double _zoom;
-        public double Zoom
-        {
+        public double Zoom {
             get { return _zoom; }
-            private set
-            {
+            private set {
                 _zoom = value;
                 NotifyChanged("Zoom");
                 NotifyChanged("ZoomPercent");
             }
         }
 
-        public int ZoomPercent
-        {
+        public int ZoomPercent {
             get { return (int)(Zoom * 100.0); }
         }
 
@@ -365,13 +411,17 @@ namespace ScreenGrab.Windows
             //if (!Keyboard.IsKeyDown(Key.LeftCtrl)) {
             //    return;
             //}
-            if (e.Delta < 0) {
-                if (Zoom > .5) {
+            if (e.Delta < 0)
+            {
+                if (Zoom > .5)
+                {
                     Zoom -= .01;
                 }
             }
-            else if (e.Delta > 0) {
-                if (Zoom < 2) {
+            else if (e.Delta > 0)
+            {
+                if (Zoom < 2)
+                {
                     Zoom += .01;
                 }
             }
@@ -399,7 +449,8 @@ namespace ScreenGrab.Windows
             var overlay = new WindowOverlay(DockPanelMainWindow);
             AdornerLayer parentAdorner = AdornerLayer.GetAdornerLayer(DockPanelMainWindow);
 
-            if (parentAdorner == null) {
+            if (parentAdorner == null)
+            {
                 return;
             }
 

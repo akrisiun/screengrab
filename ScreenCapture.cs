@@ -34,7 +34,7 @@ namespace ScreenGrab
             set { _highlights = value; }
         }
 
-        public ScreenCapture(ImageSource source)
+        public ScreenCapture(ImageSource source, string fileName = null)
         {
             Source = source;
             DateCaptured = DateTime.Now.ToString(CultureInfo.InvariantCulture);
